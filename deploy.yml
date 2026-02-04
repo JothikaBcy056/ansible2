@@ -1,29 +1,37 @@
-- name: Deploy website using Ansible
-  hosts: apache
-  become: true
+- name: Deploy HTML Website on Apache
+  hosts: apache_servers
+  become: yes
 
   tasks:
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+
     - name: Install Apache
       apt:
         name: apache2
         state: present
-        update_cache: yes
 
     - name: Ensure Apache is running
       service:
         name: apache2
         state: started
-        enabled: true
+        enabled: yes
 
-    - name: Remove default Apache index
+    - name: Remove default Apache index.html
       file:
         path: /var/www/html/index.html
         state: absent
 
-    - name: Copy website index.html
+    - name: Copy website files
       copy:
-        src: ../website/index.html
-        dest: /var/www/html/index.html
+        src: ../webapp/
+        dest: /var/www/html/
         owner: www-data
         group: www-data
-        mode: '0644'
+        mode: "0644"
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
